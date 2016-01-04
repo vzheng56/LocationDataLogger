@@ -163,6 +163,8 @@
 		17A9214E1AFA998C00FF79C2 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
+				LastSwiftMigration = 0720;
+				LastSwiftUpdateCheck = 0720;
 				LastUpgradeCheck = 0630;
 				ORGANIZATIONNAME = "SJR Development";
 				TargetAttributes = {
@@ -422,6 +424,7 @@
 				17A9217A1AFA998C00FF79C2 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		17A9217B1AFA998C00FF79C2 /* Build configuration list for PBXNativeTarget "LocationDataLoggerTests" */ = {
 			isa = XCConfigurationList;
@@ -430,6 +433,7 @@
 				17A9217D1AFA998C00FF79C2 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 

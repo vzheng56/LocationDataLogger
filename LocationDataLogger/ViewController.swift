@@ -10,7 +10,7 @@ import UIKit
 import CoreLocation
 
 class ViewController: UIViewController, CLLocationManagerDelegate {
-
+    
     let locationManager = CLLocationManager()
     
     var lastLat = 0.0
@@ -23,28 +23,28 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        println("loaded ok")
+        print("loaded ok")
         
         self.formatter.timeStyle = .MediumStyle
         self.formatter.dateStyle = .ShortStyle
         
         // Do any additional setup after loading the view, typically from a nib.
     }
-
+    
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
     
     func JSONStringify(value: AnyObject, prettyPrinted: Bool = false) -> String {
-        println("getting json...")
+        print("getting json...")
         
-        var options = prettyPrinted ? NSJSONWritingOptions.PrettyPrinted : nil
+        let options = prettyPrinted ? NSJSONWritingOptions.PrettyPrinted : NSJSONWritingOptions.PrettyPrinted
         
-        println(NSJSONSerialization.isValidJSONObject(value))
+        print(NSJSONSerialization.isValidJSONObject(value))
         
         if NSJSONSerialization.isValidJSONObject(value) {
-            if let data = NSJSONSerialization.dataWithJSONObject(value, options: options, error: nil) {
+            if let data = try? NSJSONSerialization.dataWithJSONObject(value, options: options) {
                 if let string = NSString(data: data, encoding: NSUTF8StringEncoding) {
                     return string as String
                 }
@@ -54,38 +54,38 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
     }
     
     @IBAction func getMyLocation(sender: AnyObject) {
-        println("getting location");
+        print("getting location");
         self.locationManager.delegate = self
         self.locationManager.desiredAccuracy = kCLLocationAccuracyBest
         self.locationManager.requestWhenInUseAuthorization()
         self.locationManager.startUpdatingLocation()
     }
-
-    func locationManager(manager: CLLocationManager!, didUpdateLocations locations: [AnyObject]!) {
-        println("updated location")
+    
+    func locationManager(manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        print("updated location")
         
-        CLGeocoder().reverseGeocodeLocation(manager.location, completionHandler: {(placemarks, error)->Void in
+        CLGeocoder().reverseGeocodeLocation(manager.location!, completionHandler: {(placemarks, error)->Void in
             
             if (error != nil) {
-                println("Reverse geocoder failed with error" + error.localizedDescription)
+                print("Reverse geocoder failed with error" + error!.localizedDescription)
                 return
                 
             }
             
-            if (placemarks.count > 0) {
-                let pm = placemarks[0] as! CLPlacemark
+            if (placemarks!.count > 0) {
+                let pm = placemarks![0] as! CLPlacemark
                 self.displayLocationInfo(pm)
             } else {
-                println("Problem with the data received from geocoder")
+                print("Problem with the data received from geocoder")
             }
         })
     }
     
     func displayLocationInfo(placemark: CLPlacemark) {
-       /*
+        /*
         println("got new placemark")
         //stop updating location to save battery life
-       // self.locationManager.stopUpdatingLocation()
+        // self.locationManager.stopUpdatingLocation()
         println("Latitude: \(placemark.location.coordinate.latitude)")
         println("Longitude: \(placemark.location.coordinate.longitude)")
         println("Locality: \(placemark.locality)")
@@ -101,37 +101,37 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
         
         
         if(self.lastLat == 0.0) {
-            self.lastLat = placemark.location.coordinate.latitude
-            self.lastLng = placemark.location.coordinate.longitude
+            self.lastLat = placemark.location!.coordinate.latitude
+            self.lastLng = placemark.location!.coordinate.longitude
             
-            logChange(placemark.location, thisDate: thisDate)
+            logChange(placemark.location!, thisDate: thisDate)
         }
-       
+        
         if(thisDate.timeIntervalSinceDate(self.lastTimestamp) >= 10) {
             self.lastTimestamp = thisDate
             
-            println("got update")
-          
+            print("got update")
+            
+            
+            if(placemark.location!.coordinate.latitude != self.lastLat || placemark.location!.coordinate.longitude != self.lastLng) {
                 
-            if(placemark.location.coordinate.latitude != self.lastLat || placemark.location.coordinate.longitude != self.lastLng) {
-                
-                logChange(placemark.location, thisDate: thisDate)
+                logChange(placemark.location!, thisDate: thisDate)
                 
             } else {
-                println("But no change");
+                print("But no change");
             }
             
         } else {
             return
         }
-      
+        
     }
     
     func logChange(placemark:CLLocation, thisDate:NSDate) {
         self.lastLat = placemark.coordinate.latitude
         self.lastLng = placemark.coordinate.longitude
         
-        println("--New location--")
+        print("--New location--")
         // timestamp
         // string timestamp
         // placemark.location
@@ -150,30 +150,30 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
         println(Double(placemark.location.coordinate.longitude))
         */
         
-        var newRowData = [
-        "tstamp": thisDate.description,
-        "date": self.formatter.stringFromDate(thisDate),
-        "placemark": placemark.description,
-        "lat": Double(placemark.coordinate.latitude),
-        "lng": Double(placemark.coordinate.longitude)
+        let newRowData = [
+            "tstamp": thisDate.description,
+            "date": self.formatter.stringFromDate(thisDate),
+            "placemark": placemark.description,
+            "lat": Double(placemark.coordinate.latitude),
+            "lng": Double(placemark.coordinate.longitude)
         ]
         
-        println(newRowData)
+        print(newRowData)
         self.journeyArray.append(newRowData)
     }
     
-    func locationManager(manager: CLLocationManager!, didFailWithError error: NSError!) {
-        println("failed to update location \(error.localizedDescription)");
+    func locationManager(manager: CLLocationManager, didFailWithError error: NSError) {
+        print("failed to update location \(error.localizedDescription)");
     }
-
+    
     @IBAction func finishJourney(sender: AnyObject) {
-        println("---Journey complete---")
+        print("---Journey complete---")
         self.locationManager.stopUpdatingLocation()
         
         let jsonStringPretty = JSONStringify(self.journeyArray, prettyPrinted: true)
-        println(jsonStringPretty)
+        print(jsonStringPretty)
         self.jsonOutputScreen.text = jsonStringPretty
     }
-
+    
 }
 
